@@ -87,7 +87,7 @@ def launch_socket():
                         progress.update(len(bytes_read))
                 finally:
                     output = pickle.loads(buffer)
-                    logger.info('SOCKET - output: ', str(output))
+                    logger.info('SOCKET - output: {}'.format(output))
                     database.writeToDatabase(output)
                     break
 
