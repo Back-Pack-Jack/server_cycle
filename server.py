@@ -53,7 +53,7 @@ def launch_socket():
         while True:
             client_socket, address = s.accept() 
             # if below code is executed, that means the sender is connected
-            logger.info('SOCKET - ', f"[+] {address} is connected.")
+            logger.info('SOCKET - ' + f"[+] {address} is connected.")
 
             # receive the file infos
             # receive using client socket, not server socket
