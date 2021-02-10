@@ -4,11 +4,7 @@ import datetime
 import logging
 from config import DATABASE
 
-# Initialize Logging
-logging.basicConfig(level=logging.WARNING)  # Global logging configuration
-logger = logging.getLogger("database")  # Logger for this module
-logger.setLevel(logging.INFO) # Debugging for this file.
-
+logger = logging.getLogger("DATABASE")  # Logger for this module
 
 # Connect to the postgres database
 def connect():
