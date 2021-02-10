@@ -25,10 +25,12 @@ from config import MQT
 
 
 # Initialize Logging
-logging.basicConfig(level=logging.WARNING)  # Global logging configuration
+logging.basicConfig(filename='server.log',
+                            filemode='a',
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%Y-%m-%d, %H:%M:%S',
+                            level=logging.DEBUG)  # Global logging configuration
 logger = logging.getLogger("SERVER")  # Logger for this module
-logger.setLevel(logging.INFO) # Debugging for this file.
-
 
 def launch_socket():
 
