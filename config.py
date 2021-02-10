@@ -18,7 +18,7 @@ class DATABASE:
 
 class MQT:
     BROKER_HOST = HOST
-    BROKER_PORT = 1883
+    BROKER_PORT = 1884
     CLIENT_ID = "Server"
     TOPIC = [("cycle/init", 2), ("cycle/zones", 2), ("cycle/gps", 2)]
 
