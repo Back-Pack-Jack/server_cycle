@@ -5,7 +5,13 @@ import datetime
 import logging
 from config import DATABASE
 
-logger = logging.getLogger("DATABASE").addHandler(logging.StreamHandler(sys.stdout))  # Logger for this module
+logger = logging.getLogger("DATABASE")  # Logger for this module
+
+output_file_handler = logging.FileHandler("database.log")
+stdout_handler = logging.StreamHandler(sys.stdout)
+
+logger.addHandler(output_file_handler)
+logger.addHandler(stdout_handler)
 
 # Connect to the postgres database
 def connect():
