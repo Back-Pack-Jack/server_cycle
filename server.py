@@ -29,7 +29,7 @@ logging.basicConfig(filename='server.log',
                             filemode='a',
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d, %H:%M:%S',
-                            level=logging.DEBUG)  # Global logging configuration
+                            level=logging.INFO)  # Global logging configuration
 logger = logging.getLogger("SERVER")  # Logger for this module
 
 def launch_socket():
@@ -60,6 +60,7 @@ def launch_socket():
             # receive the file infos
             # receive using client socket, not server socket
             received = client_socket.recv(BUFFER_SIZE).decode()
+            logger.info('SOCKET - Recieved Buffer Size of {}'.format(received))
             filename, filesize = received.split(SEPARATOR)
             # remove absolute path if there is
             filename = os.path.basename(filename)
@@ -77,26 +78,28 @@ def launch_socket():
                     for _ in progress:
                         # read 1024 bytes from the socket (receive)
                         bytes_read = client_socket.recv(BUFFER_SIZE)
-                        logger.info(bytes_read)
                         if not bytes_read:    
                             # nothing is received
                             # file transmitting is done
+                            logger.info('SOCKET - Completed Transfer Of Information')
                             break
                         # write to the file the bytes we just received
                         #f.write(bytes_read)
                         buffer += bytes_read
+                        logger.info('SOCKET - Recieving...')
                         # update the progress bar
                         progress.update(len(bytes_read))
                 finally:
                     output = pickle.loads(buffer)
-                    logger.info('SOCKET - output: {}'.format(output))
+                    logger.info('SOCKET - Recieved: {}'.format(output))
                     database.writeToDatabase(output)
+                    client_socket.close()
+                    logger.info("SOCKET - Closed Client Socket")
+                    s.close()
+                    logger.info("SOCKET - Closed Server Socket")
                     break
 
-                # close the client socket
-                client_socket.close()
-                # close the server socket
-                s.close()
+                
    
     if __name__ == "__main__":
        main()
