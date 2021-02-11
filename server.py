@@ -4,6 +4,7 @@ import os
 import database
 import time
 import threading
+import sys
 
 # Socket Imports
 import socket
@@ -14,7 +15,6 @@ from config import SOCK
 
 # MQTT Imports
 import signal
-import sys
 import json
 from time import sleep
 import subprocess
@@ -30,7 +30,7 @@ logging.basicConfig(filename='server.log',
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d, %H:%M:%S',
                             level=logging.INFO)  # Global logging configuration
-logger = logging.getLogger("SERVER")  # Logger for this module
+logger = logging.getLogger("SERVER").addHandler(logging.StreamHandler(sys.stdout))  # Logger for this module
 
 def launch_socket():
 

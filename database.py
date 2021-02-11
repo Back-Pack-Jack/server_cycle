@@ -1,10 +1,11 @@
+import sys
 import psycopg2
 import time
 import datetime
 import logging
 from config import DATABASE
 
-logger = logging.getLogger("DATABASE")  # Logger for this module
+logger = logging.getLogger("DATABASE").addHandler(logging.StreamHandler(sys.stdout))  # Logger for this module
 
 # Connect to the postgres database
 def connect():
