@@ -72,7 +72,6 @@ def launch_socket():
                 conn = context.wrap_socket(client_socket, server_side=True)
             except:
                 logger.error('Unauthorised Access Attempt')
-                break
             logger.info("SSL established. Peer: {}".format(conn.getpeercert()))
             # receive the file infos
             # receive using client socket, not server socket
