@@ -63,16 +63,23 @@ def launch_socket():
     BUFFER_SIZE = 4096  # Receive 4096 Bytes In Each Transmission
     SEPARATOR = "<SEPARATOR>"
 
-    def main():
-        # accept connection if there is any
+    def wrappedSocket():
         while True:
             client_socket, address = s.accept()
             logger.info('SOCKET - ' + f"[+] {address} is connected.")
             try:
                 conn = context.wrap_socket(client_socket, server_side=True)
+                logger.info("SSL established. Peer: {}".format(conn.getpeercert()))
+                return conn
             except:
                 logger.error('Unauthorised Access Attempt')
-            logger.info("SSL established. Peer: {}".format(conn.getpeercert()))
+
+            
+
+    def main():
+        # accept connection if there is any
+        while True:
+            conn = wrappedSocket()
             # receive the file infos
             # receive using client socket, not server socket
             received = conn.recv(BUFFER_SIZE).decode()
