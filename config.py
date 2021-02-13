@@ -3,11 +3,12 @@ import pickle
 
 HOST = "0.0.0.0"
 
-'''
-class PATHS:
-    PATH = os.path.join(os.path.dirname(__file__),'')
 
-'''
+class PATHS:
+    SERVER_CERT = os.path.join(os.path.dirname(__file__),'resources/server.crt')
+    SERVER_KEY = os.path.join(os.path.dirname(__file__),'resources/server.key')
+    CLIENT_CERT = os.path.join(os.path.dirname(__file__),'resources/client.crt')
+    
 
 class DATABASE:
     HOST = "detections.cdtm4kvpi8en.eu-west-2.rds.amazonaws.com"
@@ -26,3 +27,7 @@ class MQT:
 class SOCK:
     SERVER_HOST = HOST
     SERVER_PORT = 5001
+    SERVER_CERT = PATHS.SERVER_CERT
+    SERVER_KEY = PATHS.SERVER_KEY
+    CLIENT_CERT = PATHS.CLIENT_CERT
+

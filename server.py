@@ -5,6 +5,7 @@ import database
 import time
 import threading
 import sys
+import ssl
 
 # Socket Imports
 import socket
@@ -44,29 +45,34 @@ def launch_socket():
     # device's IP address
     SERVER_HOST = SOCK.SERVER_HOST
     SERVER_PORT = SOCK.SERVER_PORT
+    SERVER_CERT = SOCK.SERVER_CERT
+    SERVER_KEY = SOCK.SERVER_KEY
+    CLIENT_CERT = SOCK.CLIENT_CERT
+
+    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    context.verify_mode = ssl.CERT_REQUIRED
+    context.load_cert_chain(certfile=SERVER_CERT, keyfile=SERVER_KEY)
+    context.load_verify_locations(cafile=CLIENT_CERT)
+
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create a TCP socket Object
+    s.bind((SERVER_HOST, SERVER_PORT)) # Bind The Socket To Our Server Port
+    s.listen(5) # Listen, allow 5 pending requests
+    logger.info('SOCKET - '+ f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
 
     BUFFER_SIZE = 4096  # Receive 4096 Bytes In Each Transmission
     SEPARATOR = "<SEPARATOR>"
 
-    s = socket.socket() # Create The Server Socket
-    s.bind((SERVER_HOST, SERVER_PORT)) # Bind The Socket To Our Local Address
-
-    # --- Enabling our server to accept connections
-    # --- 5 here is the number of accepted connections that
-    # --- the system will allow before refusing new connections
-    s.listen(5)
-    logger.info('SOCKET - '+ f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
-
     def main():
         # accept connection if there is any
         while True:
-            client_socket, address = s.accept() 
-            # if below code is executed, that means the sender is connected
+            client_socket, address = s.accept()
             logger.info('SOCKET - ' + f"[+] {address} is connected.")
-
+            conn = context.wrap_socket(client_socket, server_side=True)
+            logger.info("SSL established. Peer: {}".format(conn.getpeercert()))
             # receive the file infos
             # receive using client socket, not server socket
-            received = client_socket.recv(BUFFER_SIZE).decode()
+            received = conn.recv(BUFFER_SIZE).decode()
             logger.info('SOCKET - Recieved Buffer Size of {}'.format(received))
             filename, filesize = received.split(SEPARATOR)
             # remove absolute path if there is
@@ -84,7 +90,7 @@ def launch_socket():
                 try:
                     for _ in progress:
                         # read 1024 bytes from the socket (receive)
-                        bytes_read = client_socket.recv(BUFFER_SIZE)
+                        bytes_read = conn.recv(BUFFER_SIZE)
                         if not bytes_read:    
                             # nothing is received
                             # file transmitting is done
@@ -100,7 +106,8 @@ def launch_socket():
                     output = pickle.loads(buffer)
                     logger.info('SOCKET - Recieved: {}'.format(output))
                     database.writeToDatabase(output)
-                    client_socket.close()
+                    conn.shutdown(socket.SHUT_RDWR)
+                    conn.close()
                     logger.info("SOCKET - Closed Client Socket")
                     s.close()
                     logger.info("SOCKET - Closed Server Socket")
