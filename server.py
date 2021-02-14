@@ -54,16 +54,10 @@ def launch_socket():
     context.load_cert_chain(certfile=SERVER_CERT, keyfile=SERVER_KEY)
     context.load_verify_locations(cafile=CLIENT_CERT)
 
-
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create a TCP socket Object
-    s.bind((SERVER_HOST, SERVER_PORT)) # Bind The Socket To Our Server Port
-    s.listen(5) # Listen, allow 5 pending requests
-    logger.info('SOCKET - '+ f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
-
     BUFFER_SIZE = 4096  # Receive 4096 Bytes In Each Transmission
     SEPARATOR = "<SEPARATOR>"
 
-    def wrappedSocket():
+    def wrappedSocket(s):
         while True:
             client_socket, address = s.accept()
             logger.info("client socket: {}".format(client_socket))
@@ -81,7 +75,12 @@ def launch_socket():
     def main():
         # accept connection if there is any
         while True:
-            conn = wrappedSocket()
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create a TCP socket Object
+            s.bind((SERVER_HOST, SERVER_PORT)) # Bind The Socket To Our Server Port
+            s.listen(5) # Listen, allow 5 pending requests
+            logger.info('SOCKET - '+ f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
+
+            conn = wrappedSocket(s)
             # receive the file infos
             # receive using client socket, not server socket
             received = conn.recv(BUFFER_SIZE).decode()
