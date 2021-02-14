@@ -66,8 +66,8 @@ def launch_socket():
     def wrappedSocket():
         while True:
             client_socket, address = s.accept()
-            print(client_socket)
-            print(address)
+            logger.info("client socket: {}".format(client_socket))
+            logger.info("client address: {}".format(address))
             logger.info('SOCKET - ' + f"[+] {address} is connected.")
             try:
                 conn = context.wrap_socket(client_socket, server_side=True)
