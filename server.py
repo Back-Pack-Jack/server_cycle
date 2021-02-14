@@ -121,7 +121,6 @@ def launch_socket():
                     logger.info("SOCKET - Closed Client Socket")
                     s.close()
                     logger.info("SOCKET - Closed Server Socket")
-                    break
 
                 
    
