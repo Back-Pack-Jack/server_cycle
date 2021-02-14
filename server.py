@@ -116,11 +116,12 @@ def launch_socket():
                     output = pickle.loads(buffer)
                     logger.info('SOCKET - Recieved: {}'.format(output))
                     database.writeToDatabase(output)
-                    conn.shutdown(socket.SHUT_RDWR)
+                    #conn.shutdown(socket.SHUT_RDWR)
                     conn.close()
                     logger.info("SOCKET - Closed Client Socket")
                     s.close()
                     logger.info("SOCKET - Closed Server Socket")
+                    break
 
                 
    
