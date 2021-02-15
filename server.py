@@ -66,8 +66,6 @@ def launch_socket():
     def wrappedSocket():
         while True:
             client_socket, address = s.accept()
-            logger.info("client socket: {}".format(client_socket))
-            logger.info("client address: {}".format(address))
             logger.info('SOCKET - ' + f"[+] {address} is connected.")
             try:
                 conn = context.wrap_socket(client_socket, server_side=True)
@@ -116,9 +114,9 @@ def launch_socket():
                         progress.update(len(bytes_read))
                 finally:
                     output = pickle.loads(buffer)
-                    logger.info('SOCKET - Recieved: {}'.format(output))
                     database.writeToDatabase(output)
                     conn.shutdown(socket.SHUT_RDWR)
+                    logger.info("SOCKET - Shutdown Client Socket")
                     conn.close()
                     logger.info("SOCKET - Closed Client Socket")
                     break
