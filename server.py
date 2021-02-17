@@ -117,6 +117,7 @@ def launch_socket():
                     database.writeToDatabase(output)
                     #conn.shutdown(socket.SHUT_RDWR)
                     #logger.info("SOCKET - Shutdown Client Socket")
+                    conn.shutdown(socket.SHUT_WR)
                     conn.close()
                     logger.info("SOCKET - Closed Client Socket")
                     break
