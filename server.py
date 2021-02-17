@@ -117,7 +117,7 @@ def launch_socket():
                     logger.info("SOCKET - Shutdown Client Socket")
                     conn.close()
                     logger.info("SOCKET - Closed Client Socket")
-                    output = pickle.load(buffer)
+                    output = pickle.loads(buffer)
                     database.writeToDatabase(output)
                     break
 
