@@ -113,13 +113,12 @@ def launch_socket():
                         # update the progress bar
                         progress.update(len(bytes_read))
                 finally:
-                    output = pickle.loads(b"".join(bufferlist))
-                    database.writeToDatabase(output)
-                    #conn.shutdown(socket.SHUT_RDWR)
-                    #logger.info("SOCKET - Shutdown Client Socket")
-                    conn.shutdown(socket.SHUT_WR)
+                    conn.shutdown(socket.SHUT_RDWR)
+                    logger.info("SOCKET - Shutdown Client Socket")
                     conn.close()
                     logger.info("SOCKET - Closed Client Socket")
+                    output = pickle.loads(b"".join(bufferlist))
+                    database.writeToDatabase(output)
                     break
 
                 
