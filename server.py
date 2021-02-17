@@ -97,33 +97,30 @@ def launch_socket():
 
             bufferlist = []
             while True:
-                #try:
-                    #for _ in progress:
-                        # read 4096 bytes from the socket (receive)
                 try:
-                    bytes_read = conn.recv(BUFFER_SIZE)
-                except:
-                    pass
-                    if not bytes_read:    
-                        # nothing is received
-                        # file transmitting is done
-                        logger.info('SOCKET - Completed Transfer Of Information')
-                        break
-                    # write to the file the bytes we just received
-                    #f.write(bytes_read)
-                    bufferlist.append(bytes_read)
-                    logger.info('SOCKET - Recieving...')
-                    # update the progress bar
-                    progress.update(len(bytes_read))
-                    #finally:
-            output = pickle.loads(b"".join(bufferlist))
-            database.writeToDatabase(output)
-            #conn.shutdown(socket.SHUT_RDWR)
-            #logger.info("SOCKET - Shutdown Client Socket")
-            conn.shutdown(socket.SHUT_WR)
-            conn.close()
-            logger.info("SOCKET - Closed Client Socket")
-            #break
+                    for _ in progress:
+                        # read 4096 bytes from the socket (receive)
+                        bytes_read = conn.recv(BUFFER_SIZE)
+                        if not bytes_read:    
+                            # nothing is received
+                            # file transmitting is done
+                            logger.info('SOCKET - Completed Transfer Of Information')
+                            break
+                        # write to the file the bytes we just received
+                        #f.write(bytes_read)
+                        bufferlist.append(bytes_read)
+                        logger.info('SOCKET - Recieving...')
+                        # update the progress bar
+                        progress.update(len(bytes_read))
+                finally:
+                    output = pickle.loads(b"".join(bufferlist))
+                    database.writeToDatabase(output)
+                    #conn.shutdown(socket.SHUT_RDWR)
+                    #logger.info("SOCKET - Shutdown Client Socket")
+                    conn.shutdown(socket.SHUT_WR)
+                    conn.close()
+                    logger.info("SOCKET - Closed Client Socket")
+                    break
 
                 
    
