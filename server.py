@@ -95,7 +95,7 @@ def launch_socket():
             # and writing to the file stream
             progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=BUFFER_SIZE)
 
-            buffer = bytearray(b'')
+            buffer = b''
             while True:
                 try:
                     for _ in progress:
@@ -108,12 +108,11 @@ def launch_socket():
                             break
                         # write to the file the bytes we just received
                         #f.write(bytes_read)
-                        buffer.append(bytes_read)
+                        buffer += bytes_read
                         logger.info('SOCKET - Recieving...')
                         # update the progress bar
                         progress.update(len(bytes_read))
                 finally:
-                    buffer = bytes(buffer)
                     output = pickle.loads(buffer)
                     database.writeToDatabase(output)
                     #conn.shutdown(socket.SHUT_RDWR)
