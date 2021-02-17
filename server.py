@@ -93,13 +93,13 @@ def launch_socket():
 
             # start receiving the file from the socket
             # and writing to the file stream
-            progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+            progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=4096)
 
             buffer = b''
             while True:
                 try:
                     for _ in progress:
-                        # read 1024 bytes from the socket (receive)
+                        # read 4096 bytes from the socket (receive)
                         bytes_read = conn.recv(BUFFER_SIZE)
                         if not bytes_read:    
                             # nothing is received
