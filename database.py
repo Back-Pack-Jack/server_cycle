@@ -28,6 +28,7 @@ def writeToDatabase(output):
     logger.info("Opened connection To Database")
     cur = conn.cursor() # Open a cursor to perform db operations
     logger.info("Created Database Cursor")
+    #add try statement to flag records that are incorrect along with the device for debugging
     for _, record in enumerate(output):
         cur.execute("INSERT INTO detections (id, gate, datetime, classification) VALUES (%s, %s, %s, %s) ", (record[0], record[1], datetime.datetime.fromtimestamp(record[2]), record[3]))
     logger.info("Inserted Detections Into Database")
