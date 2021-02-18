@@ -6,6 +6,7 @@ import time
 import threading
 import sys
 import ssl
+import struct
 
 # Socket Imports
 import socket
@@ -96,31 +97,35 @@ def launch_socket():
             progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=BUFFER_SIZE)
 
             buffer = b''
-            while True:
-                try:
-                    for _ in progress:
-                        # read 4096 bytes from the socket (receive)
-                        bytes_read = conn.recv(BUFFER_SIZE)
-                        if not bytes_read:    
-                            # nothing is received
-                            # file transmitting is done
-                            logger.info('SOCKET - Completed Transfer Of Information')
-                            break
-                        # write to the file the bytes we just received
-                        #f.write(bytes_read)
-                        buffer += bytes_read
-                        logger.info('SOCKET - Recieving...')
-                        # update the progress bar
-                        progress.update(len(bytes_read))
-                finally:
-                    conn.shutdown(socket.SHUT_RDWR)
-                    logger.info("SOCKET - Shutdown Client Socket")
-                    conn.close()
-                    logger.info("SOCKET - Closed Client Socket")
-                    print(buffer)
-                    output = pickle.loads(buffer)
-                    database.writeToDatabase(output)
+            while len(buffer) < 4:
+                buffer += conn.recv(4 - len(buffer))
+                progress.update(len(buffer))
+            
+            length = struct.unpack('!I', buf)[0]
+            '''
+                # read 4096 bytes from the socket (receive)
+                bytes_read = conn.recv(BUFFER_SIZE)
+                if not bytes_read:    
+                    # nothing is received
+                    # file transmitting is done
+                    logger.info('SOCKET - Completed Transfer Of Information')
                     break
+                # write to the file the bytes we just received
+                #f.write(bytes_read)
+                buffer += bytes_read
+                logger.info('SOCKET - Recieving...')
+                # update the progress bar
+                progress.update(len(bytes_read))
+            '''
+                
+            conn.shutdown(socket.SHUT_RDWR)
+            logger.info("SOCKET - Shutdown Client Socket")
+            conn.close()
+            logger.info("SOCKET - Closed Client Socket")
+            print(buffer)
+            output = pickle.loads(buffer)
+            database.writeToDatabase(output)
+                
 
                 
    
