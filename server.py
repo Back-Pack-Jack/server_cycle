@@ -6,7 +6,7 @@ import time
 import threading
 import sys
 import ssl
-import struct
+from struct import unpack
 
 # Socket Imports
 import socket
