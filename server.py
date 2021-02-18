@@ -101,7 +101,8 @@ def launch_socket():
                 buffer += conn.recv(4 - len(buffer))
                 progress.update(len(buffer))
             
-            length = struct.unpack('!I', buf)[0]
+            length = struct.unpack('!I', buffer)[0]
+            print(length)
             '''
                 # read 4096 bytes from the socket (receive)
                 bytes_read = conn.recv(BUFFER_SIZE)
