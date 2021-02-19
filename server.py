@@ -70,7 +70,7 @@ def launch_socket():
             logger.info('SOCKET - ' + f"[+] {address} is connected.")
             try:
                 conn = context.wrap_socket(client_socket, server_side=True)
-                logger.info("SSL established. Peer: {}".format(conn.getpeercert()))
+                #logger.info("SSL established. Peer: {}".format(conn.getpeercert()))
                 return conn
             except:
                 logger.error('Unauthorised Access Attempt')
@@ -111,6 +111,7 @@ def launch_socket():
                 conn.close()
             
             output = pickle.loads(buffer)
+            logger.info(output)
             database.writeToDatabase(output)
 
 
