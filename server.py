@@ -6,7 +6,7 @@ import time
 import threading
 import sys
 import ssl
-import struct
+from struct import unpack
 
 # Socket Imports
 import socket
@@ -22,6 +22,7 @@ from time import sleep
 import subprocess
 import paho.mqtt.client as mqtt 
 import threading
+from _thread import *
 import hashlib
 from config import MQT
 
@@ -39,7 +40,6 @@ stdout_handler = logging.StreamHandler(sys.stdout)
 
 logger.addHandler(output_file_handler)
 logger.addHandler(stdout_handler)
-
 
 def launch_socket():
 
@@ -63,75 +63,58 @@ def launch_socket():
 
     BUFFER_SIZE = 4096  # Receive 4096 Bytes In Each Transmission
     SEPARATOR = "<SEPARATOR>"
+            
+
+    def multi_threaded_client(conn):
+        
+        while True:
+            received = conn.recv(BUFFER_SIZE).decode()
+            filename, filesize = received.split(SEPARATOR)
+            filename = os.path.basename(filename)
+            filesize = int(filesize)
+            progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=BUFFER_SIZE)
+
+            try:
+                bs = conn.recv(8)
+                (length,) = unpack('>Q', bs)
+                buffer = b""
+                while len(buffer) < length:
+                    to_read = length - len(buffer)
+                    buffer += conn.recv(
+                        4096 if to_read > 4096 else to_read)
+                    progress.update(len(buffer))
+                progress.close()
+                
+                assert len(b'\00') == 1
+                conn.sendall(b'\00')
+            finally:
+                conn.shutdown(socket.SHUT_WR)
+                logger.info("SOCKET - Client Socket Shutdown")
+                conn.close()
+            
+            buffer = buffer.decode("utf-8")
+            
+            database.writeToDatabase(buffer) # TESTING
+            logger.info("SOCKET - Submitted To Database")
+            sys.exit()
+
 
     def wrappedSocket():
         while True:
             client_socket, address = s.accept()
             logger.info('SOCKET - ' + f"[+] {address} is connected.")
             try:
-                conn = context.wrap_socket(client_socket, server_side=True)
-                logger.info("SSL established. Peer: {}".format(conn.getpeercert()))
-                return conn
+                conn = context.wrap_socket(client_socket, server_side=True) 
+                #logger.info("SSL established. Peer: {}".format(conn.getpeercert())) 
+                start_new_thread(multi_threaded_client, (conn,))
             except:
                 logger.error('Unauthorised Access Attempt')
-
-            
-
-    def main():
-        # accept connection if there is any
-        while True:
-            conn = wrappedSocket()
-            # receive the file infos
-            # receive using client socket, not server socket
-            received = conn.recv(BUFFER_SIZE).decode()
-            logger.info('SOCKET - Recieved Buffer Size of {}'.format(received))
-            filename, filesize = received.split(SEPARATOR)
-            # remove absolute path if there is
-            filename = os.path.basename(filename)
-            # convert to integer
-            filesize = int(filesize)
-
-
-            # start receiving the file from the socket
-            # and writing to the file stream
-            progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=BUFFER_SIZE)
-
-            buffer = b''
-            while len(buffer) < 4:
-                buffer += conn.recv(4 - len(buffer))
-                progress.update(len(buffer))
-            
-            length = struct.unpack('!I', buffer)[0]
-            print(length)
-            '''
-                # read 4096 bytes from the socket (receive)
-                bytes_read = conn.recv(BUFFER_SIZE)
-                if not bytes_read:    
-                    # nothing is received
-                    # file transmitting is done
-                    logger.info('SOCKET - Completed Transfer Of Information')
-                    break
-                # write to the file the bytes we just received
-                #f.write(bytes_read)
-                buffer += bytes_read
-                logger.info('SOCKET - Recieving...')
-                # update the progress bar
-                progress.update(len(bytes_read))
-            '''
-                
-            conn.shutdown(socket.SHUT_RDWR)
-            logger.info("SOCKET - Shutdown Client Socket")
-            conn.close()
-            logger.info("SOCKET - Closed Client Socket")
-            print(buffer)
-            output = pickle.loads(buffer)
-            database.writeToDatabase(output)
-                
-
+            #s.close()
                 
    
     if __name__ == "__main__":
-       main()
+       wrappedSocket()
+
 
 def launch_mqtt():
 
@@ -221,6 +204,6 @@ def launch_mqtt():
 
 if __name__ == "__main__":
     t1 = threading.Thread(target=launch_socket)
-    t2 = threading.Thread(target=launch_mqtt)
+    #t2 = threading.Thread(target=launch_mqtt)
     t1.start()
-    t2.start()
+   # t2.start()
