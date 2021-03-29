@@ -94,7 +94,7 @@ def launch_socket():
             
             try:
                 buffer = buffer.decode("utf-8")
-            else:
+            except:
                 buffer = pickle.loads(buffer)
             
             database.writeToDatabase(buffer) # TESTING
