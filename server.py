@@ -36,7 +36,7 @@ logging.basicConfig(        filemode='a',
 logger = logging.getLogger("SERVER")  # Logger for this module
 
 output_file_handler = logging.FileHandler("server.log")
-stdout_handler = logging.StreamHandler(sys.stdout)
+#stdout_handler = logging.StreamHandler(sys.stdout)
 
 logger.addHandler(output_file_handler)
 #logger.addHandler(stdout_handler)
