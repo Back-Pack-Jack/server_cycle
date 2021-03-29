@@ -46,6 +46,7 @@ logging.basicConfig(        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s
                             level=logging.INFO)
 logger = logging.getLogger()
 
+
 def lambda_handler(event, context):
     logger.info('## ENVIRONMENT VARIABLES')
     logger.info(os.environ)
