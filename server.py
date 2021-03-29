@@ -41,9 +41,10 @@ logger.addHandler(stdout_handler)
 '''
 
 # --- AWS Logging
-
+logging.basicConfig(        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%Y-%m-%d, %H:%M:%S',
+                            level=logging.INFO)
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
     logger.info('## ENVIRONMENT VARIABLES')
