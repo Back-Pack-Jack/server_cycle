@@ -39,7 +39,7 @@ output_file_handler = logging.FileHandler("server.log")
 stdout_handler = logging.StreamHandler(sys.stdout)
 
 logger.addHandler(output_file_handler)
-logger.addHandler(stdout_handler)
+#logger.addHandler(stdout_handler)
 
 def launch_socket():
 
@@ -112,7 +112,6 @@ def launch_socket():
                 start_new_thread(multi_threaded_client, (conn,))
             except:
                 logger.error('Unauthorised Access Attempt')
-            #s.close()
                 
    
     if __name__ == "__main__":
