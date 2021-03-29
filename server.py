@@ -32,14 +32,25 @@ logging.basicConfig(        filemode='a',
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d, %H:%M:%S',
                             level=logging.INFO)  # Global logging configuration
-'''
+
 logger = logging.getLogger("SERVER")  # Logger for this module
-
 output_file_handler = logging.FileHandler("server.log")
-#stdout_handler = logging.StreamHandler(sys.stdout)
-
+stdout_handler = logging.StreamHandler(sys.stdout)
 logger.addHandler(output_file_handler)
-#logger.addHandler(stdout_handler)
+logger.addHandler(stdout_handler)
+'''
+
+# --- AWS Logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+def lambda_handler(event, context):
+    logger.info('## ENVIRONMENT VARIABLES')
+    logger.info(os.environ)
+    logger.info('## EVENT')
+    logger.info(event)
+
 
 def launch_socket():
 
