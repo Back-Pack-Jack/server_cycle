@@ -26,13 +26,13 @@ from _thread import *
 import hashlib
 from config import MQT
 
-
+'''
 # Initialize Logging
 logging.basicConfig(        filemode='a',
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d, %H:%M:%S',
                             level=logging.INFO)  # Global logging configuration
-
+'''
 logger = logging.getLogger("SERVER")  # Logger for this module
 
 output_file_handler = logging.FileHandler("server.log")
