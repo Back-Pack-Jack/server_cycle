@@ -92,7 +92,10 @@ def launch_socket():
                 logger.info("SOCKET - Client Socket Shutdown")
                 conn.close()
             
-            buffer = buffer.decode("utf-8")
+            try:
+                buffer = buffer.decode("utf-8")
+            else:
+                buffer = pickle.loads(buffer)
             
             database.writeToDatabase(buffer) # TESTING
             logger.info("SOCKET - Submitted To Database")
