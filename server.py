@@ -1,7 +1,7 @@
 # General Imports
 import logging
 import os
-import database
+import serverutils
 import time
 import threading
 import sys
@@ -76,45 +76,49 @@ def launch_socket():
 
     BUFFER_SIZE = 4096  # Receive 4096 Bytes In Each Transmission
     SEPARATOR = "<SEPARATOR>"
-            
 
-    def multi_threaded_client(conn):
-        
+    def packet_handler(packet):
+        ID = packet["ID"]
+        TIME = packet["TIME"]
+        TOPIC = packet["TOPIC"]
+        DATA = packet["DATA"]
+        serverutils.write_to_db(ID, TOPIC, DATA, TIME)
+
+
+    def multi_threaded_packet(conn):    
         while True:
             received = conn.recv(BUFFER_SIZE).decode()
-            filename, filesize = received.split(SEPARATOR)
-            filename = os.path.basename(filename)
-            filesize = int(filesize)
-            progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=BUFFER_SIZE)
+            TIME, ID, packetsize, TOPIC = received.split(SEPARATOR)
 
-            try:
-                bs = conn.recv(8)
-                (length,) = unpack('>Q', bs)
-                buffer = b""
-                while len(buffer) < length:
-                    to_read = length - len(buffer)
-                    buffer += conn.recv(
-                        4096 if to_read > 4096 else to_read)
-                    progress.update(len(buffer))
-                progress.close()
+            if packetsize != '-1':
+                packetsize = int(packetsize)
+                progress = tqdm.tqdm(range(packetsize), f"Receiving {TOPIC} from {ID}", unit="B", unit_scale=True, unit_divisor=BUFFER_SIZE)
+
+                try:
+                    bs = conn.recv(8)
+                    (length,) = unpack('>Q', bs)
+                    buffer = b""
+                    while len(buffer) < length:
+                        to_read = length - len(buffer)
+                        buffer += conn.recv(
+                            4096 if to_read > 4096 else to_read)
+                        progress.update(len(buffer))
+                    progress.close()
+                    
+                    assert len(b'\00') == 1
+                    conn.sendall(b'\00')
+                finally:
+                    conn.shutdown(socket.SHUT_WR)
+                    logger.info("SOCKET - Client Socket Shutdown")
+                    conn.close()
                 
-                assert len(b'\00') == 1
-                conn.sendall(b'\00')
-            finally:
-                conn.shutdown(socket.SHUT_WR)
-                logger.info("SOCKET - Client Socket Shutdown")
-                conn.close()
-            
-            try:
-                buffer = buffer.decode("utf-8")
-            except:
                 buffer = pickle.loads(buffer)
-            
-            database.writeToDatabase(buffer) # TESTING
-            logger.info("SOCKET - Submitted To Database")
+                packet_handler(buffer)
+            else:
+                packet = b'test' # Thu 8 Apr
+                conn.sendall(packet)
             sys.exit()
-
-
+        
     def wrappedSocket():
         while True:
             client_socket, address = s.accept()
@@ -122,7 +126,7 @@ def launch_socket():
             try:
                 conn = context.wrap_socket(client_socket, server_side=True) 
                 #logger.info("SSL established. Peer: {}".format(conn.getpeercert())) 
-                start_new_thread(multi_threaded_client, (conn,))
+                start_new_thread(multi_threaded_packet, (conn,))
             except:
                 logger.error('Unauthorised Access Attempt')
                 
@@ -150,7 +154,7 @@ def launch_mqtt():
         msg_top = msg.topic
 
         if msg_top == 'cycle/init':
-            database.addDeviceToDB(msg_dec)
+            serverutils.addDeviceToDB(msg_dec)
 
     # --- MQTT Related Functions and Callbacks --------------------------------------------------------------
 
@@ -219,6 +223,6 @@ def launch_mqtt():
 
 if __name__ == "__main__":
     t1 = threading.Thread(target=launch_socket)
-    #t2 = threading.Thread(target=launch_mqtt)
+    t2 = threading.Thread(target=launch_mqtt)
     t1.start()
-   # t2.start()
+    t2.start()

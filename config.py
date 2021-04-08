@@ -1,7 +1,7 @@
 import os
 import pickle
 
-HOST = "0.0.0.0"
+HOST = "192.168.1.236"
 
 
 class PATHS:
@@ -19,7 +19,7 @@ class DATABASE:
 
 class MQT:
     BROKER_HOST = HOST
-    BROKER_PORT = 1884
+    BROKER_PORT = 1883    #AWS 1884
     CLIENT_ID = "Server"
     TOPIC = [("cycle/init", 2), ("cycle/zones", 2), ("cycle/gps", 2)]
 
