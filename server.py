@@ -25,8 +25,9 @@ import threading
 from _thread import *
 import hashlib
 from config import MQT
+from database import DATABASE
 
-'''
+
 # Initialize Logging
 logging.basicConfig(        filemode='a',
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
@@ -34,12 +35,13 @@ logging.basicConfig(        filemode='a',
                             level=logging.INFO)  # Global logging configuration
 
 logger = logging.getLogger("SERVER")  # Logger for this module
+'''
 output_file_handler = logging.FileHandler("server.log")
 stdout_handler = logging.StreamHandler(sys.stdout)
 logger.addHandler(output_file_handler)
 logger.addHandler(stdout_handler)
 '''
-
+'''
 # --- AWS Logging
 logging.basicConfig(        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d, %H:%M:%S',
@@ -130,7 +132,7 @@ def launch_socket():
     if __name__ == "__main__":
        wrappedSocket()
 
-
+'''
 def launch_mqtt():
 
     # Global Variables
@@ -143,14 +145,6 @@ def launch_mqtt():
     process = None
     client = None  # MQTT client instance. See init_mqtt()
     logger.info("MQTT - Creating MQTT Instance")
-
-        
-    def switch(msg):
-        msg_dec = msg.payload.decode("utf-8") # Writes the decoded msg to an object
-        msg_top = msg.topic
-
-        if msg_top == 'cycle/init':
-            database.addDeviceToDB(msg_dec)
 
     # --- MQTT Related Functions and Callbacks --------------------------------------------------------------
 
@@ -168,9 +162,17 @@ def launch_mqtt():
         logger.error("MQTT - Disconnected from Broker")
 
 
+    def handle_message(msg):
+        try:
+            DB = DATABASE(msg)
+            DB.write_to_db()
+        except Exception as e:
+            print(e)
+
+
     def on_message( client, user_data, msg): # Callback called when a message is received on a subscribed topic.                                                    
-        logger.debug("MQTT - Received message for topic {}: {}".format( msg.topic, msg.payload))
-        switch(msg)
+        logger.debug("MQTT - Received message for topic {}: {}".format( msg.topic, pickle.loads(msg.payload)))
+        handle_message(pickle.loads(msg.payload))
 
 
     def on_publish(client, user_data, connection_result_code):
@@ -209,7 +211,7 @@ def launch_mqtt():
             finally:
                 time.sleep(5)
 
-        client.loop_start()
+        client.loop_forever()
 
 
     if __name__ == "__main__":
@@ -218,7 +220,8 @@ def launch_mqtt():
 
 
 if __name__ == "__main__":
-    t1 = threading.Thread(target=launch_socket)
+    #t1 = threading.Thread(target=launch_socket)
     #t2 = threading.Thread(target=launch_mqtt)
-    t1.start()
+    #t1.start()
    # t2.start()
+   launch_mqtt()

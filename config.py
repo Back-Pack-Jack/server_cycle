@@ -10,18 +10,25 @@ class PATHS:
     CLIENT_CERT = os.path.join(os.path.dirname(__file__),'resources/client.crt')
     
 
-class DATABASE:
-    HOST = "detections.cdtm4kvpi8en.eu-west-2.rds.amazonaws.com"
-    DATABASE = "detections"
-    USER = "BPJ00SSG00"
-    PASSWORD = "!:*N~ZM48>n!`aZA"
+class DB_DEVICE:
+    HOST = "db-device.ctqynr3zk10q.eu-west-2.rds.amazonaws.com"
+    DATABASE = "postgres"
+    USER = "SSG_Mob"
+    PASSWORD = "$Zz]=(Bg{!2<FVzA"
+
+
+class DB_COLLECTED_DATA:
+    HOST = "db-collected-data.ctqynr3zk10q.eu-west-2.rds.amazonaws.com"
+    DATABASE = "postgres"
+    USER = "SSG_Mob"
+    PASSWORD = "yd>$C(X-99TFgmYP"
 
 
 class MQT:
     BROKER_HOST = HOST
     BROKER_PORT = 1884
     CLIENT_ID = "Server"
-    TOPIC = [("cycle/init", 2), ("cycle/zones", 2), ("cycle/gps", 2)]
+    TOPIC = [("sensors/#", 1)]
 
 
 class SOCK:
