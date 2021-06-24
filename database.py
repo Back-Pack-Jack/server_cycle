@@ -4,7 +4,7 @@ import time
 import datetime
 import logging
 from config import DB_DEVICE, DB_COLLECTED_DATA
-
+import pickle
 
 '''
 logger = logging.getLogger("DATABASE")  # Logger for this module
@@ -28,6 +28,7 @@ class DATABASE:
 
     def __init__(self, data):
         self.sensors = ['SPS30', 'MICS6814', 'ZMOD4510']
+        self.commands = ['img']
         self.data = data
         if data[2] not in self.sensors:
             self.conn = self.connect(DB_DEVICE)
@@ -62,12 +63,36 @@ class DATABASE:
 
         return exec(sensor + '()')
 
+    
+    def command(self, command, cur):
+
+        def uuid():
+            cur.execute("INSERT INTO device_info (uuid, datetime, device_name, owner, gates, lat, long) VALUES (%s, %s, %s, %s, %s, %s, %s)", 
+            ())
+
+
+        def img():
+            cur.execute("INSERT INTO device_img (uuid, datetime, img) VALUES (%s, %s, %s)",
+            (self.data[0], self.data[1], pickle.dumps(self.data[3])))
+
+        return exec(command + '()')
+
 
     def write_to_db(self):
+
         cur = self.conn.cursor()
-        self.sensor(self.data[2], cur)
-        self.conn.commit()
-        logger.info("DATABASE - inserted into database")
-        cur.close()
-        self.conn.close()
-        logger.info("DATABASE - closed connection")
+
+        def sub_to_db():
+            self.conn.commit()
+            logger.info("DATABASE - Inserted into database")
+            cur.close()
+            self.conn.close()
+            logger.info("DATABASE - Closed connection")
+        
+        if self.data[2] in self.sensors:
+            self.sensor(self.data[2], cur)
+            sub_to_db()
+        elif self.data[2] in self.commands:
+            self.command(self.data[2], cur)
+            sub_to_db()
+            

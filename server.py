@@ -171,7 +171,7 @@ def launch_mqtt():
 
 
     def on_message( client, user_data, msg): # Callback called when a message is received on a subscribed topic.                                                    
-        logger.debug("MQTT - Received message for topic {}: {}".format( msg.topic, pickle.loads(msg.payload)))
+        logger.info("MQTT - Received message for topic {}: {}".format( msg.topic, pickle.loads(msg.payload)))
         handle_message(pickle.loads(msg.payload))
 
 

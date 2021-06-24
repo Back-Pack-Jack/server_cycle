@@ -28,7 +28,7 @@ class MQT:
     BROKER_HOST = HOST
     BROKER_PORT = 1884
     CLIENT_ID = "Server"
-    TOPIC = [("sensors/#", 1)]
+    TOPIC = [("sensors/#", 1), ("img/#", 1)]
 
 
 class SOCK:
