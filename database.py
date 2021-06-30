@@ -28,12 +28,15 @@ class DATABASE:
 
     def __init__(self, data):
         self.sensors = ['SPS30', 'MICS6814', 'ZMOD4510']
-        self.commands = ['img']
+        self.commands = ['img', 'init']
+        self.inferences = ['object_types']
         self.data = data
-        if data[2] not in self.sensors:
-            self.conn = self.connect(DB_DEVICE)
-        else:
+        if data[2] not in self.commands:
+            print("DB_COLLECTED_DATA")
             self.conn = self.connect(DB_COLLECTED_DATA)
+        else:
+            print("DB_DEVICE")
+            self.conn = self.connect(DB_DEVICE)
 
 
     def connect(self, db):
@@ -66,16 +69,28 @@ class DATABASE:
     
     def command(self, command, cur):
 
+        def init():
+            cur.execute("INSERT INTO device_info (uuid, datetime) VALUES (%s, %s)", 
+            (self.data[0], self.data[1]))
+
         def uuid():
             cur.execute("INSERT INTO device_info (uuid, datetime, device_name, owner, gates, lat, long) VALUES (%s, %s, %s, %s, %s, %s, %s)", 
-            ())
-
+            (self.data[0], self.data[1]))
 
         def img():
             cur.execute("INSERT INTO device_img (uuid, datetime, img) VALUES (%s, %s, %s)",
             (self.data[0], self.data[1], pickle.dumps(self.data[3])))
 
         return exec(command + '()')
+
+
+    def inference(self, inference, cur):
+
+        def object_types():
+            cur.execute("INSERT INTO detections (uuid, datetime, gate, classification) VALUES (%s, %s, %s, %s)", 
+                (self.data[0], self.data[3]['time'], self.data[3]['gate'], self.data[3]['class']))
+        
+        return exec(inference + '()')
 
 
     def write_to_db(self):
@@ -94,5 +109,8 @@ class DATABASE:
             sub_to_db()
         elif self.data[2] in self.commands:
             self.command(self.data[2], cur)
+            sub_to_db()
+        else:
+            self.inference(self.data[2], cur)
             sub_to_db()
             

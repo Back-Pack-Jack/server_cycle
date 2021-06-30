@@ -5,9 +5,9 @@ HOST = "0.0.0.0"
 
 
 class PATHS:
-    SERVER_CERT = os.path.join(os.path.dirname(__file__),'resources/server.crt')
-    SERVER_KEY = os.path.join(os.path.dirname(__file__),'resources/server.key')
-    CLIENT_CERT = os.path.join(os.path.dirname(__file__),'resources/client.crt')
+    SERVER_CERT = os.path.join(os.path.dirname(__file__),'resources/server-cert.pem')
+    SERVER_KEY = os.path.join(os.path.dirname(__file__),'resources/server-key.pem')
+    CA_CERT = os.path.join(os.path.dirname(__file__),'resources/ca-cert.pem')
     
 
 class DB_DEVICE:
@@ -28,13 +28,13 @@ class MQT:
     BROKER_HOST = HOST
     BROKER_PORT = 1884
     CLIENT_ID = "Server"
-    TOPIC = [("sensors/#", 1), ("img/#", 1)]
+    TOPIC = [("sensors/#", 1), ("img/#", 1), ("init/#", 1), ("object_types/#", 1)]
 
 
 class SOCK:
     SERVER_HOST = HOST
-    SERVER_PORT = 5001
+    SERVER_PORT = 5002
     SERVER_CERT = PATHS.SERVER_CERT
     SERVER_KEY = PATHS.SERVER_KEY
-    CLIENT_CERT = PATHS.CLIENT_CERT
+    CA_CERT = PATHS.CA_CERT
 

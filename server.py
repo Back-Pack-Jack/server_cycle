@@ -41,7 +41,7 @@ stdout_handler = logging.StreamHandler(sys.stdout)
 logger.addHandler(output_file_handler)
 logger.addHandler(stdout_handler)
 '''
-'''
+
 # --- AWS Logging
 logging.basicConfig(        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d, %H:%M:%S',
@@ -63,12 +63,12 @@ def launch_socket():
     SERVER_PORT = SOCK.SERVER_PORT
     SERVER_CERT = SOCK.SERVER_CERT
     SERVER_KEY = SOCK.SERVER_KEY
-    CLIENT_CERT = SOCK.CLIENT_CERT
+    CA_CERT = SOCK.CA_CERT
 
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     context.verify_mode = ssl.CERT_REQUIRED
     context.load_cert_chain(certfile=SERVER_CERT, keyfile=SERVER_KEY)
-    context.load_verify_locations(cafile=CLIENT_CERT)
+    context.load_verify_locations(cafile=CA_CERT)
 
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create a TCP socket Object
@@ -79,6 +79,12 @@ def launch_socket():
     BUFFER_SIZE = 4096  # Receive 4096 Bytes In Each Transmission
     SEPARATOR = "<SEPARATOR>"
             
+    def handle_message(msg):
+        try:
+            DB = DATABASE(msg)
+            DB.write_to_db()
+        except Exception as e:
+            print(e)
 
     def multi_threaded_client(conn):
         
@@ -90,7 +96,7 @@ def launch_socket():
             progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=BUFFER_SIZE)
 
             try:
-                bs = conn.recv(8)
+                bs = conn.recv(4096)
                 (length,) = unpack('>Q', bs)
                 buffer = b""
                 while len(buffer) < length:
@@ -111,9 +117,11 @@ def launch_socket():
                 buffer = buffer.decode("utf-8")
             except:
                 buffer = pickle.loads(buffer)
-            
-            database.writeToDatabase(buffer) # TESTING
+
+            print(buffer)
+            handle_message(buffer)
             logger.info("SOCKET - Submitted To Database")
+
             sys.exit()
 
 
@@ -122,17 +130,18 @@ def launch_socket():
             client_socket, address = s.accept()
             logger.info('SOCKET - ' + f"[+] {address} is connected.")
             try:
-                conn = context.wrap_socket(client_socket, server_side=True) 
+                #conn = context.wrap_socket(client_socket, server_side=True) 
                 #logger.info("SSL established. Peer: {}".format(conn.getpeercert())) 
-                start_new_thread(multi_threaded_client, (conn,))
-            except:
+                start_new_thread(multi_threaded_client, (client_socket,))
+            except Exception as e:
+                print(e)
                 logger.error('Unauthorised Access Attempt')
                 
    
     if __name__ == "__main__":
        wrappedSocket()
 
-'''
+
 def launch_mqtt():
 
     # Global Variables
@@ -163,6 +172,7 @@ def launch_mqtt():
 
 
     def handle_message(msg):
+        print(msg)
         try:
             DB = DATABASE(msg)
             DB.write_to_db()
@@ -220,8 +230,8 @@ def launch_mqtt():
 
 
 if __name__ == "__main__":
-    #t1 = threading.Thread(target=launch_socket)
-    #t2 = threading.Thread(target=launch_mqtt)
-    #t1.start()
-   # t2.start()
-   launch_mqtt()
+    t1 = threading.Thread(target=launch_socket)
+    t2 = threading.Thread(target=launch_mqtt)
+    t1.start()
+    t2.start()
+   #launch_mqtt()
